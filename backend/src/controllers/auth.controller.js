@@ -48,14 +48,14 @@ export async function signup(req, res) {
 
     // Todo: Create the user in stream as well
     try {
-        await upsertStreamUser({
-            id: newUser._id.toString(),
-            name: newUser.fullName,
-            image: newUser.profilePicture || "",
-        });
-        console.log(`Stream user created for ${newUser.fullName}`);
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePicture || "",
+      });
+      console.log(`Stream user created for ${newUser.fullName}`);
     } catch (error) {
-        console.error("Error creating Stream user:", error);
+      console.error("Error creating Stream user:", error);
     }
 
     // Generate JWT token - Creates a JWT token for the user. [{ userId: newUser._id } This is the payload — the data you're storing inside the token.newUser._id is the unique ID that MongoDB gives to the user. You're storing this so you can identify the user later when they send the token back.]. You're creating a new user in the database. The response is stored in the variable newUser. So you access their ID like this: newUser._id.
@@ -123,7 +123,7 @@ export async function login(req, res) {
       secure: process.env.NODE_ENV === "production", // secure: process.env.NODE_ENV === "production"	Cookie sent only over HTTPS in production mode (extra security).
     });
 
-    res.status(200).json({success: true, user});
+    res.status(200).json({ success: true, user });
   } catch (error) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -132,48 +132,79 @@ export async function login(req, res) {
 
 export async function logout(req, res) {
   res.clearCookie("token");
-  res.status(200).json({ success:true, message: "Logged out successfully" });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 }
 
-
+// This function handles onboarding a user by saving their profile details like name, bio, languages, and location
 export async function onboard(req, res) {
-    try {
-      const userId = req.user._id; // Get the user ID from the request object
-      const {fullName, bio, nativeLanguage, learningLanguage, location} = req.body;
+  try {
+    // Get the logged-in user's ID from the request object (set in middleware)
+    const userId = req.user._id;
 
-      if(!fullName || !bio || !nativeLanguage || !learningLanguage || !location) {
-        return res.status(400).json({ message: "All fields are required",
-          missingFields: [
-            !fullName ? "fullName" : null,
-            !bio ? "bio" : null,
-            !nativeLanguage ? "nativeLanguage" : null,
-            !learningLanguage ? "learningLanguage" : null,
-            !location ? "location" : null,
-          ].filter(Boolean) // Filters out any null values
-        });
-      }
+    // Destructure the required fields from the request body (sent from frontend)
+    const { fullName, bio, nativeLanguage, learningLanguage, location } =
+      req.body;
 
-      const updatedUser = await User.findByIdAndUpdate(userId, {
-        ...req.body,
-        isOnboarded: true,
-      }, { new: true});
-
-      try {
-        await upsertStreamUser({
-          id: updatedUser._id.toString(),
-          name: updatedUser.fullName,
-          image: updatedUser.profilePicture || "",
-        })
-        console.log(`Stream user updated after onboarding for ${updatedUser.fullName}`);
-      } catch (streamError) {
-        console.log("Error updating Stream user during onboarding:", streamError.message)
-      }
-      
-      if (!updatedUser) return res.status(404).json({ message: "User not found"});
-
-      res.status(200).json({success: true, user: updatedUser});
-    } catch (error) {
-      console.error("Onboard error:", error);
-      res.status(500).json({ message: "Internal server error" });
+    // Check if any of the required fields are missing
+    if (
+      !fullName ||
+      !bio ||
+      !nativeLanguage ||
+      !learningLanguage ||
+      !location
+    ) {
+      // If any field is missing, return 400 Bad Request with the names of missing fields
+      return res.status(400).json({
+        message: "All fields are required",
+        missingFields: [
+          !fullName ? "fullName" : null, // Add "fullName" to list if it's missing
+          !bio ? "bio" : null, // Same for "bio"
+          !nativeLanguage ? "nativeLanguage" : null,
+          !learningLanguage ? "learningLanguage" : null,
+          !location ? "location" : null,
+        ].filter(Boolean), // Remove any null values from the array
+      });
     }
+
+    // If all required fields are present, update the user in the database with the new info
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, // Find the user by ID
+      {
+        ...req.body, // Spread all fields from the request body
+        isOnboarded: true, // Mark user as onboarded
+      },
+      { new: true } // Return the updated user document
+    );
+
+    // Try to update the user in the Stream API (for chat or social features)
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(), // Convert ObjectId to string
+        name: updatedUser.fullName, // Use the updated full name
+        image: updatedUser.profilePicture || "", // Use profile picture if available
+      });
+
+      // Log success message to the console
+      console.log(
+        `Stream user updated after onboarding for ${updatedUser.fullName}`
+      );
+    } catch (streamError) {
+      // Catch any error from updating Stream and log it
+      console.log(
+        "Error updating Stream user during onboarding:",
+        streamError.message
+      );
+    }
+
+    // If user was not found and update failed, send a 404 Not Found response
+    if (!updatedUser)
+      return res.status(404).json({ message: "User not found" });
+
+    // If everything is successful, return the updated user
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    // Catch any unexpected server error and log it
+    console.error("Onboard error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
