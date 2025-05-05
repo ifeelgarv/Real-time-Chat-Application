@@ -10,4 +10,11 @@ router.post("/logout", logout);
 
 router.post("/onboarding", protectRoute, onboard);
 
+// This route is used to get the user data
+router.get("/me", protectRoute, (req, res) => {
+    res.status(200).json({
+        success: true,
+        user: req.user
+    })
+})
 export default router;

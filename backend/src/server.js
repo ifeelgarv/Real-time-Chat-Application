@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+
 import { connectDB } from "./lib/db.js";
 
 dotenv.config();
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use(cookieParser()); // This line is like giving your server a special tool to read cookies. Cookies are small pieces of data that websites store in your browser. When someone sends a cookie to your server, this line helps your server understand what that cookie says.
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
