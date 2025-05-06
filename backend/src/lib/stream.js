@@ -19,3 +19,14 @@ export const upsertStreamUser = async(userData) => {
         console.error("Error upserting Stream user:", error);
     }
 }
+
+// This function generates a token for a user to connect to the Stream Chat service
+export const generateStreamToken = (userId) => {
+    try {
+        // ensure the userId is a string
+        const userIdString = userId.toString();
+        return streamClient.createToken(userIdString);
+    } catch (error) {
+        console.error("Error generating Stream token:", error);
+    }
+}
