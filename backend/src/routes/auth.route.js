@@ -4,11 +4,12 @@ import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-router.post("/signup", signup);
-router.post("/login", login);
-router.post("/logout", logout);
+router.post("/signup", signup); // Register a new user
+router.post("/login", login); // Login a user with credentials
+router.post("/logout", logout); // Log out the current user
+router.post("/onboarding", protectRoute, onboard); // Onboard a user
 
-router.post("/onboarding", protectRoute, onboard);
+// Todo: forget-password route, reset-password/:token route, change-password route.
 
 // This route is used to get the user data
 router.get("/me", protectRoute, (req, res) => {
