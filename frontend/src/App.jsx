@@ -14,6 +14,8 @@ import { axiosInstance } from "./lib/axios.js";
 const App = () => {
   const {
     data: authData,
+    isLoading,
+    error,
   } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
