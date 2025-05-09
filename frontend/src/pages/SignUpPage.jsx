@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { signup } from "../lib/api";
+import useSignUp from "../hooks/useSignUp";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -11,12 +10,7 @@ const SignUpPage = () => {
     password: "",
   });
 
-  const queryClient = useQueryClient();
-
-  const { mutate:signupMutation, isPending, error } = useMutation({
-    mutationFn: signup,
-    onSuccess: () => queryClient.invalidateQueries({queryKey: ["authUser"]}),
-  })
+  const { signupMutation, isPending, error } = useSignUp();
 
   const handleSignup = (e) => {
     e.preventDefault();
@@ -45,14 +39,13 @@ const SignUpPage = () => {
             </div>
           )}
 
-
           <div className="w-full">
             <form onSubmit={handleSignup}>
               <div className="space-y-4">
                 <div>
                   <h2 className="text-xl font-semibold">Create an Account</h2>
                   <p className="text-sm opacity-70">
-                  Unlock new voices and cultures with a single click.
+                    Unlock new voices and cultures with a single click.
                   </p>
                 </div>
 
@@ -60,7 +53,7 @@ const SignUpPage = () => {
                   <div className="form-control w-full">
                     <label className="label">
                       <span className="label-text font-semibold">
-                      Your Name
+                        Your Name
                       </span>
                     </label>
 
@@ -81,7 +74,9 @@ const SignUpPage = () => {
 
                   <div className="form-control w-full">
                     <label className="label">
-                      <span className="label-text font-semibold">Email Address</span>
+                      <span className="label-text font-semibold">
+                        Email Address
+                      </span>
                     </label>
 
                     <input
@@ -101,7 +96,9 @@ const SignUpPage = () => {
 
                   <div className="form-control w-full">
                     <label className="label">
-                      <span className="label-text font-semibold">Create Password</span>
+                      <span className="label-text font-semibold">
+                        Create Password
+                      </span>
                     </label>
 
                     <input
@@ -147,7 +144,9 @@ const SignUpPage = () => {
                 <button className="btn btn-primary w-full" type="submit">
                   {isPending ? (
                     <>
-                    <span className="loading loading-spinner loading-xs">Signing Up...</span>
+                      <span className="loading loading-spinner loading-xs">
+                        Signing Up...
+                      </span>
                     </>
                   ) : (
                     "Let’s Go 🚀"
@@ -157,10 +156,7 @@ const SignUpPage = () => {
                 <div className="text-center mt-4">
                   <p className="text-sm">
                     Already a member?{" "}
-                    <Link
-                      className="text-primary hover:underline"
-                      to="/login"
-                    >
+                    <Link className="text-primary hover:underline" to="/login">
                       Login here
                     </Link>
                   </p>
@@ -174,16 +170,18 @@ const SignUpPage = () => {
         <div className="hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center">
           <div className="max-w-md p-8">
             <div className="relative aspect-square max-w-sm mx-auto">
-              <img src="/vc.png" className="w-full h-full"/>
+              <img src="/vc.png" className="w-full h-full" />
             </div>
 
             <div className="text-center space-y-3 mt-6">
-              <h2 className="text-xl font-semibold">Talk & Talk, Anywhere in the World</h2>
+              <h2 className="text-xl font-semibold">
+                Talk & Talk, Anywhere in the World
+              </h2>
               <p className="opacity-70 text-xs tracking-tight">
-                From casual chats to cultural exchanges - Calligo is your passport to better conversations.
+                From casual chats to cultural exchanges - Calligo is your
+                passport to better conversations.
               </p>
             </div>
-
           </div>
         </div>
       </div>

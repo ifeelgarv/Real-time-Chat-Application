@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast, { LoaderIcon } from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
 import {
@@ -13,7 +13,7 @@ import { LANGUAGES } from "../constants";
 
 const OnboardingPage = () => {
   const { authUser } = useAuthUser(); // This gets authenticated or looggedIn user data from a custom hook called useAuthUser
-
+  const queryClient = useQueryClient();
   const [formState, setFormState] = useState({
     fullName: authUser?.fullName || "",
     bio: authUser?.bio || "",
@@ -30,7 +30,7 @@ const OnboardingPage = () => {
     // To specify what should happen after a mutation is successful. Or once the mutation is successfully completed, the function inside onSuccess is triggered. here data represents the response data that is returned when the mutation completes successfully.
     onSuccess: (data) => {
       toast.success("Profile onboarded successfully");
-      QueryClient.invalidateQueries({ queryKey: ["authUser"] }); // ensures that React Query fetches fresh data about the logged-in user by invalidating the query related to authUser, so that the next time the app needs to display user data, it gets the updated data.
+      queryClient.invalidateQueries({ queryKey: ["authUser"] }); // ensures that React Query fetches fresh data about the logged-in user by invalidating the query related to authUser, so that the next time the app needs to display user data, it gets the updated data.
     },
 
     onError: (error) => {
