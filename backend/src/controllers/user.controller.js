@@ -8,11 +8,13 @@ export async function getRecommendedUsers(req, res) {
 
     // Get all users except the current user
     const recommendedUsers = await User.find({
-      _id: { $ne: currentUserId }, // Exclude current user
-      isOnboarded: true, // Only include onboarded users
-      _id: { $nin: currentUser.friends }, // exclude current user's friends
+      $and: [
+        { _id: { $ne: currentUserId }}, // Exclude current user
+        {_id: { $nin: currentUser.friends }}, // exclude current user's friends
+        {isOnboarded: true,} // Only include onboarded users
+      ],  
     });
-    res.json({
+    res.status(200).json({
       recommendedUsers,
     });
   } catch (error) {
@@ -65,11 +67,12 @@ export async function sendFriendRequest(req, res) {
 
     // Check if the recipient has already sent a friend request or request already exists
     const isAlreadyRequested = await FriendRequest.findOne({
-      sender: myId,
-      recipient: recipientId,
-      myId: recipientId,
-      recipientId: myId,
+      $or: [
+        { sender: myId, recipient: recipientId },
+        { sender: recipientId, recipient: myId }
+      ],
     });
+    
     if (isAlreadyRequested) {
       return res.status(400).json({ message: "Friend request already sent." });
     }

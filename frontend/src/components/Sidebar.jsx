@@ -53,10 +53,10 @@ const Sidebar = () => {
 
       {/* User Profile Section */}
       <div className="p-4 border-t border-base-300 mt-auto">
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
           <div className="avatar">
             <div className="w-10 rounded-full">
-              <img src={authUser?.profilePicture} alt="Use Avatar" />
+              <img src={authUser?.profilePicture} alt="User Avatar" />
             </div>
           </div>
 
